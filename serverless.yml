@@ -1,0 +1,34 @@
+service: my-serverless-project
+
+frameworkVersion: '3' 
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-prune-plugin
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+
+functions:
+  userGate:
+    handler: src/handlers/authorizer.userGate
+    logRetentionInDays: 1
+  public:
+    handler: src/handlers/publicEndpoint.publicEndpoint
+    events:
+      - http:
+          path: /public
+          method: GET
+  private:
+    handler: src/handlers/privateEndpoint.privateEndpoint
+    events:
+      - http:
+          path: /private
+          method: GET
+          authorizer:
+            name: userGate
+            identitySource: method.request.header.Authorization
+      
